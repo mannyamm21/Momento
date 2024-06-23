@@ -311,9 +311,9 @@ export async function updatePost(post: IUpdatePost) {
     const hasFileToUpdate = post.file.length > 0;
     try {
         let image = {
-            imageUrl: post.imageUrl,
+            imageUrl: typeof post.imageUrl === 'string' ? new URL(post.imageUrl) : post.imageUrl,
             imageId: post.imageId,
-        }
+        };
 
         if (hasFileToUpdate) {
             // Update image to storage
@@ -327,7 +327,7 @@ export async function updatePost(post: IUpdatePost) {
                 deleteFile(uploadedFile.$id);
                 throw Error;
             }
-            image = { ...image, imageUrl: fileUrl, imageId: uploadedFile.$id }
+            image = { ...image, imageUrl: new URL(fileUrl), imageId: uploadedFile.$id };
         }
 
         // Converting tags into an array
@@ -340,7 +340,7 @@ export async function updatePost(post: IUpdatePost) {
             post.postId,
             {
                 caption: post.caption,
-                imageUrl: image.imageUrl,
+                imageUrl: image.imageUrl.toString(), // Ensure imageUrl is stored as string
                 imageId: image.imageId,
                 location: post.location,
                 tags: tags,
@@ -357,6 +357,7 @@ export async function updatePost(post: IUpdatePost) {
         throw error;
     }
 }
+
 
 // Function to delete a post
 export async function deletePost(postId: string, imageId: string) {
